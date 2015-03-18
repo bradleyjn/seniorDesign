@@ -9,7 +9,7 @@ byte sensorValue = 0;
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize serial communication at 9600 bits per second:
-  Serial.begin(9600);
+  Serial.begin(115200);
 }
 
 // the loop routine runs over and over again forever:
@@ -19,5 +19,6 @@ void loop() {
   // print out the value you read:
   //sensorValue = (sensorValue >> 2) & B11111111;
   Serial.write(sensorValue);
+  //Serial.println(sensorValue, DEC);
   delay(1);        // delay in between reads for stability
 }

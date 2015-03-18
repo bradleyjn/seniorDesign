@@ -42,11 +42,11 @@ byte getY(byte val) {
 void draw()
 {
   while (port.available() > 0) {
-      val = port.readBytes();
+      values[width-1] = port.readBytes();
   }
   for (int i=0; i<width-1; i++)
     values[i] = values[i+1];
-  values[width-1] = val;
+  //values[width-1] = val;
   background(0);
   stroke(255);
   for (int x=1; x<width; x++) {
