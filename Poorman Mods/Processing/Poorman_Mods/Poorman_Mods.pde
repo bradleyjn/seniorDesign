@@ -44,6 +44,7 @@ void draw()
   while (port.available() >= 3) {
     if (port.read() == 0xff) {
       val = (port.read() << 8) | (port.read());
+      println(binary(val));
     }
   }
   for (int i=0; i<width-1; i++)

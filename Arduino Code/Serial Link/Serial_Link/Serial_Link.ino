@@ -6,6 +6,7 @@
  This example code is in the public domain.
  */
 byte sensorValue = 0;
+byte gain = B00000001;
 // the setup routine runs once when you press reset:
 void setup() {
   // initialize serial communication at 9600 bits per second:
@@ -18,6 +19,7 @@ void loop() {
   sensorValue = analogRead(A0);
   // print out the value you read:
   //sensorValue = (sensorValue >> 2) & B11111111;
+  Serial.write(gain);
   Serial.write(sensorValue);
   //Serial.println(sensorValue, DEC);
   delay(1);        // delay in between reads for stability
