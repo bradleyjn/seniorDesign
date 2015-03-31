@@ -35,7 +35,7 @@ String vVal2, hVal2;
 Slider abc;
 
 void setup() {
-  size(1200,600);
+  size(1900,950);
   noStroke();
   cp5 = new ControlP5(this);
   
