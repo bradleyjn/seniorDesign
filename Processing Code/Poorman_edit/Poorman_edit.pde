@@ -28,15 +28,17 @@ int[] values;
 
 void setup() 
 {
-  size(640, 480);
+  size(800, 600);
   // Open the port that the board is connected to and use the same speed (9600 bps)
   port = new Serial(this, "COM25", 115200);
-  values = new int[width];
+  values = new int[600];
   smooth();
+  
+
 }
 
 int getY(int val) {
-  return (int)(val / 1023.0f * height) - 1;
+  return (int)(val / 1023.0f * 400) - 1;
 }
 
 void draw()
@@ -46,14 +48,16 @@ void draw()
       val = (port.read() << 8) | (port.read());
     }
   }
-  for (int i=0; i<width-1; i++)
+  for (int i=0; i<600-1; i++)
     values[i] = values[i+1];
-  values[width-1] = val;
+  values[600-1] = val;
   background(0);
+  fill(100);
+  rect(100,100,600,400);
   stroke(255);
-  for (int x=1; x<width; x++) {
-    line(width-x,   height-1-getY(values[x-1]), 
-         width-1-x, height-1-getY(values[x]));
+  for (int x=1; x<600; x++) {
+    line(600-x+100,   400-1+100-getY(values[x-1]), 
+         600-1-x+100, 400-1+100-getY(values[x]));
   }
 }
 
