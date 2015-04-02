@@ -19,7 +19,7 @@ int trigger, Hslider1, Hslider2, Vslider1, Vslider2;
 boolean Tcursor1, Tcursor2, Vcursor1, Vcursor2;
 PFont f;
 float vScale, tScale;
-float v1, v2, dv;
+float v1, v2, dv, t1, t2, dt, freq;
 String vVal2, hVal2;
 
 Serial port;  // Create object from Serial class
@@ -60,7 +60,7 @@ void setup() {
      .setPosition(1360,175)
      .setWidth(515)
      .setRange(0,255)
-     .setValue(128)
+     .setValue(153)
      .setHeight(20)
      .setNumberOfTickMarks(6)
      .setSliderMode(Slider.FLEXIBLE)
@@ -68,6 +68,7 @@ void setup() {
      
   //sets label top
   cp5.getController("voltsDiv").getCaptionLabel().align(ControlP5.CENTER, ControlP5.TOP_OUTSIDE).setPaddingX(0);
+  cp5.getController("voltsDiv").getValueLabel().setVisible(false); 
   
 
   cp5.addSlider("timeDiv") //timeDiv slider
@@ -75,13 +76,14 @@ void setup() {
      .setWidth(515)
      .setHeight(20)
      .setRange(0,255)
-     .setValue(128)
-     .setNumberOfTickMarks(10)
+     .setValue(148)
+     .setNumberOfTickMarks(13)
      .setSliderMode(Slider.FLEXIBLE)
      ;
 
   //sets lable at top
   cp5.getController("timeDiv").getCaptionLabel().align(ControlP5.CENTER, ControlP5.TOP_OUTSIDE).setPaddingX(0);
+  cp5.getController("timeDiv").getValueLabel().setVisible(false); 
     
   cp5.addSlider("trigger") //trigger slider
      .setPosition(1300,25)
@@ -160,17 +162,17 @@ void setup() {
   
   cp5.addBang("ZeroH",1360,52,25,25); //bang for zero the horPos
   
-  cp5.addBang("ZeroV",1360,250,25,25); //bang for zero the vertPos
+  cp5.addBang("ZeroV",1360,330,25,25); //bang for zero the vertPos
   cp5.getController("ZeroV").getCaptionLabel().align(ControlP5.CENTER, ControlP5.TOP_OUTSIDE).setPaddingX(0); //lable at top
   
-  cp5.addBang("Reset",1360,350,25,25);//bang for trigger reset
+  cp5.addBang("Reset",1360,270,25,25);//bang for trigger reset
   cp5.getController("Reset").getCaptionLabel().align(ControlP5.CENTER, ControlP5.TOP_OUTSIDE).setPaddingX(0); //label at top
     
   
   f = createFont("Arial",16,true); //creates font class
   
   //serial link setup
-  //port = new Serial(this, "COM25", 115200);
+  port = new Serial(this, "COM25", 115200);
   values = new int[1200];
   smooth();
   
@@ -179,7 +181,7 @@ void setup() {
 
 //getY method
 int getY(int val) {
-  return (int)(val / 1023.0f * 900) + 25 ;
+  return (int)(((val / 256.0f) * (900/vScale)) + 25);// + (900*vScale)-900);
 }
 
 
@@ -226,6 +228,51 @@ public void voltsDiv(int theValue) {
       break;
     case 255:
       vScale = 5;
+      break;
+  }
+}
+
+//events for timeDiv
+public void timeDiv(int theValue) {
+  switch (theValue) {
+    case 0:
+      tScale = .005;
+      break;
+    case 21:
+      tScale = .01;
+      break;
+    case 42:
+      tScale = .02;
+      break;
+    case 63:
+      tScale = .05;
+      break;
+    case 85:
+      tScale = .1;
+      break;
+    case 106:
+      tScale = .2;
+      break;
+    case 127:
+      tScale = .5;
+      break;
+    case 148:
+      tScale = 1;
+      break;
+    case 170:
+      tScale = 2;
+      break;
+    case 191:
+      tScale = 5;
+      break;
+    case 212:
+      tScale = 10;
+      break;
+    case 233:
+      tScale = 20;
+      break;
+    case 255:
+      tScale = 50;
       break;
   }
 }
@@ -294,16 +341,19 @@ void draw() {
   
   textFont(f,12);
   fill(255);
-  text("20us",1353,147);
-  text("50us",1410,147);
-  text("100us",1462,147);
-  text("200us",1517,147);
-  text("500us",1574,147);
-  text("1ms",1634,147);
-  text("2ms",1690,147);
-  text("5ms",1747,147);
-  text("10ms",1799,147);
-  text("20ms",1854,147);
+  text("5us",1353,147);
+  text("10us",1392,147);
+  text("20us",1440,147);
+  text("50us",1485,147);
+  text("100us",1522,147);
+  text("200us",1564,147);
+  text("500us",1603,147);
+  text("1ms",1648,147);
+  text("2ms",1689,147);
+  text("5ms",1731,147);
+  text("10ms",1771,147);
+  text("20ms",1812,147);
+  text("50ms",1854,147);
 
   //gets values from sliders
   trigger = Math.round(cp5.getController("trigger").getValue());
@@ -317,8 +367,8 @@ void draw() {
   Vslider2 = Math.round(cp5.getController("Vslider2").getValue());  
   
   //math for offset and delay
-  hVal = ((horPos*.009765625) - 5);
-  vVal = ((vertPos*.009765625) - 5);
+  hVal = ((horPos*.009765625) - 5)*tScale;
+  vVal = ((vertPos*.0078125) - 4)*vScale;
   
   //draw screen in colors of sliders
   fill(128,150,140);
@@ -361,62 +411,80 @@ void draw() {
   //logic for trigger lines and text and such
   if (Tcursor1==true) {
     line(Hslider1,25,Hslider1,925);
-    text("Time 1 = "+Hslider1,1490,440);
+    t1 = ((.0083333333)*(Hslider1-25) - 5)*tScale;
+    String t1_1 = String.format("%.3f", t1);
+    text("Time 1 = "+t1_1+" ms",1490,440);
   }
   
   if (Tcursor2==true) {
     line(Hslider2,25,Hslider2,925);
-    text("Time 2 = "+Hslider2,1490,470);
+    t2 = ((.0083333333)*(Hslider2-25) - 5)*tScale;
+    String t2_2 = String.format("%.3f", t2);
+    text("Time 2 = "+t2_2+" ms",1490,470);
   }  
 
-
+  if ((Tcursor1==true) && (Tcursor2==true)) {
+    dt = Math.abs(t1-t2);
+    freq = (1/dt)*1000;
+    String dt_1 = String.format("%.3f", dt);
+    String freq_1 = String.format("%.2f", freq);
+    text("\u0394 Time = "+dt_1+" ms",1490,500);
+    text("Freq = "+(freq_1)+" Hz",1490,530);
+  }
 
   if (Vcursor1==true) {
     line(25,Vslider1,1225,Vslider1);
     v1 = ((-.0088888888)*(Vslider1-25) + 4)*vScale;
     String v1_1 = String.format("%.3f", v1);
-    text("Voltage 1 = "+v1_1,1650,440);
+    text("Voltage 1 = "+v1_1+" V",1650,440);
   }
   
   if (Vcursor2==true) {
     line(25,Vslider2,1225,Vslider2);
     v2 = ((-.0088888888)*(Vslider2-25) + 4)*vScale;
     String v2_2 = String.format("%.3f", v2);
-    text("Voltage 2 = "+v2_2,1650,470);
+    text("Voltage 2 = "+v2_2+" V",1650,470);
   } 
 
   if ((Vcursor1==true) && (Vcursor2==true)) {
     dv = Math.abs(v1-v2);
     String dv_1 = String.format("%.3f", dv);
-    text("\u0394 Voltage = "+dv_1,1650,500);
+    text("\u0394 Voltage = "+dv_1+" V",1650,500);
   }
   
   //text for offset and delay
   textFont(f,14);
   vVal2 = String.format("%.3f", vVal);
   fill(255);
-  text("Offset = "+vVal2+" V",1335,290);
+  text("Offset = "+vVal2+" V",1335,370);
 
   hVal2 = String.format("%.3f", hVal);
   text("Delay = "+hVal2,1400,70);
   
   
-  //draw signal
+//draw signal
   
-//  while (port.available() >= 3) {
-//    if (port.read() == 0xff) {
-//      val = (port.read() << 8) | (port.read());
-//    }
-//  }
-//  for (int i=0; i<1200-1; i++)
-//    values[i] = values[i+1];
-//  values[1200-1] = val;
-//  stroke(22, 245, 57);
-//  strokeWeight(2);
-//  for (int x=1; x<1200-1; x++) {
-//    line(1200-x+25,900+50-getY(values[x-1]), 
-//         1200-1-x+25,900+50-getY(values[x]));
-//  }
+  while (port.available() >= 2) {
+    if (port.read() == 0xff) {
+      val = port.read();
+    }
+  }
+  for (int i=0; i<1200-1; i++)
+    values[i] = values[i+1];
+  values[1200-1] = val;
+  stroke(22, 245, 57);
+  strokeWeight(2);
+  for (int x=1; x<1200-1; x++) {
+    int x1 = 1200-x+25;
+    int x2 = 1200-1-x+25;
+    int y1 = 900+50-getY(values[x-1])+(512-Math.round(vertPos));
+    int y2 = 900+50-getY(values[x])+(512-Math.round(vertPos));
+    x1 = constrain(x1,26,1224);
+    x2 = constrain(x2,26,1224);
+    y1 = constrain(y1,26,924);
+    y2 = constrain(y2,26,924);
+    line(x1,y1,x2,y2);
+  }
 
 } //end draw
 
