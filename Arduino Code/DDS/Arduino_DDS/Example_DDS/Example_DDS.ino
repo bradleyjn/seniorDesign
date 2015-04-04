@@ -22,16 +22,33 @@ you gotta beer me.
 long freq; //32-bit global frequency variable
  
 #include <SPI.h>
-#include "TimerOne.h"
  
 // Define the FSYNC (used for SD funtion)
-#define FSYNC 2
+#define FSYNC 7
+
+//volatile byte pulse = 0;
+
+ISR(TIMER2_COMPB_vect){  // Interrupt service routine to pulse the modulated pin 3
+   //pulse++;
+ //if(pulse >= 8) { // change number for number of modulation cycles in a pulse
+ //  pulse =0;
+//   TCCR2A ^= _BV(COM2B1); // toggle pin 3 enable, turning the pin on and off
+ //}
+}
+
+void setIrModOutput(){  // sets pin 3 at 400kHz
+ pinMode(3, OUTPUT);
+ TCCR2A = _BV(COM2B1) | _BV(WGM21) | _BV(WGM20); // Just enable output on Pin 3 and disable it on Pin 11
+ TCCR2B = _BV(WGM22) | _BV(CS22);
+ OCR2A = 7; // defines the frequency 51 = 38.4 KHz, 54 = 36.2 KHz, 58 = 34 KHz, 62 = 32 KHz
+ OCR2B = round(OCR2A/2);  // deines the duty cycle - Half the OCR2A value for 50%
+ TCCR2B = TCCR2B & 0b00111000 | 0x2; // select a prescale value of 8:1 of the system clock
+}
  
 void setup()
 {
- Timer1.initialize(1);
- Timer1.pwm(9, 512);
- 
+ setIrModOutput();
+ TIMSK2 = _BV(OCIE2B); // Output Compare Match B Interrupt Enable
  pinMode(FSYNC, OUTPUT); //FSYNC
  
  Serial.begin(9600); // start serial communication at 9600bps
@@ -44,7 +61,7 @@ void setup()
  delay(100); //A little set up time, just to make sure everything's stable
  
  //Initial frequency
- freq = 1000;
+ freq = 10000;
  WriteFrequencyAD9837(freq);
  
  Serial.print("Frequency is ");
@@ -55,7 +72,9 @@ void setup()
  
 void loop()
 {
-
+  //WriteFrequencyAD9837(20000);
+  delay(100);
+  
 }
 void WriteFrequencyAD9837(long frequency)
 {
@@ -70,7 +89,7 @@ void WriteFrequencyAD9837(long frequency)
  long calculated_freq_word;
  float AD9837Val = 0.00000000;
  
- AD9837Val = (((float)(frequency))/1000000);
+ AD9837Val = (((float)(frequency))/250000);
  calculated_freq_word = AD9837Val*0x10000000;
  
  /*
@@ -103,8 +122,8 @@ WriteRegisterAD9837(phase); //mid-low
  
  //Power it back up
  //WriteRegisterAD9837(0x2020); //square with half frequency
-  WriteRegisterAD9837(0x2028); //square
- //WriteRegisterAD9837(0x2000); //sin
+ //WriteRegisterAD9837(0x2028); //square
+ WriteRegisterAD9837(0x2000); //sin
  //WriteRegisterAD9837(0x2002); //triangle
  
 }
