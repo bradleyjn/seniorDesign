@@ -12,13 +12,16 @@
 #define LEDTriPin 4
 #define MUXPin 2
 
-volatile byte pulse = 0;
+//volatile byte pulse = 0;
+volatile int ADCRW = 1;
 
 long freq;
 
 ISR(TIMER2_COMPB_vect){  // Interrupt service routine to pulse 3
-   pulse++;
-   readADC();
+   //pulse++;
+   //if (ADCRW == 1){
+     //readADC();
+   //}
 }
 
 void setMCLK(){  // sets pin 3 at 400kHz
@@ -48,6 +51,7 @@ void setup()
  digitalWrite(CS_DDS, HIGH);
  digitalWrite(CS_ADC, HIGH);
  digitalWrite(CS_POTS, HIGH);
+ digitalWrite(MUXPin, HIGH);
  
  //Start the SPI bus
  SPI.setDataMode(SPI_MODE2);
@@ -56,14 +60,14 @@ void setup()
  
  //Initial frequency
  freq = 10000;
- WriteFrequencyAD9837(freq);
+ writeFrequencyDDS(freq);
+ writeWaveformDDS(0);
+ //writeDDS(5, freq, 0);
  
  //Set the digital pots all to 0
  for(int i=0; i<4;i++){
     digitalPotWrite(i, 0);
   }
-  
-  digitalWrite(MUXPin, HIGH);
  
  //Start the serial connection
  Serial.begin(9600);
@@ -74,7 +78,12 @@ void loop()
   
 }
 
-void WriteFrequencyAD9837(long frequency)
+void writeDDS(int amp, long frequency, int form){
+  writeFrequencyDDS(frequency);
+  writeWaveformDDS(form);
+}
+
+void writeFrequencyDDS(long frequency)
 {
  //
  int MSB;
@@ -120,13 +129,13 @@ writeRegisterDDS(phase); //mid-low
  
  //Power it back up
  //writeRegisterDDS(0x2020); //square with half frequency
- writeRegisterDDS(0x2028); //square
+ //writeRegisterDDS(0x2028); //square
  //writeRegisterDDS(0x2000); //sin
  //writeRegisterDDS(0x2002); //triangle
- 
+ //writeWaveform(1);
 }
 
-void writeWaveform(int form){
+void writeWaveformDDS(int form){
   switch (form){
    case 0:  //sine
     writeRegisterDDS(0x2000); //sin
@@ -147,6 +156,7 @@ void writeWaveform(int form){
 //This is the guy that does the actual talking to the AD9837
 void writeRegisterDDS(int dat)
 {
+ //ADCRW = 0;
  //Writes data to the DDS registers
  digitalWrite(CS_DDS, LOW); //Set FSYNC low
  delay(10);
@@ -156,6 +166,7 @@ void writeRegisterDDS(int dat)
  
  delay(10);
  digitalWrite(CS_DDS, HIGH); //Set FSYNC high
+ //ADCRW = 1;
 }
 
 void readADC(){
@@ -182,6 +193,7 @@ void readADC(){
 }
 
 void digitalPotWrite(int address, int value) {
+  ADCRW = 0;
   // take the SS pin low to select the chip:
   digitalWrite(CS_POTS,LOW);
   //  send in the address and value via SPI:
@@ -189,6 +201,7 @@ void digitalPotWrite(int address, int value) {
   SPI.transfer(value);
   // take the SS pin high to de-select the chip:
   digitalWrite(CS_POTS,HIGH); 
+  ADCRW = 1;
 }
 
 void setAmplitude(int amp){
