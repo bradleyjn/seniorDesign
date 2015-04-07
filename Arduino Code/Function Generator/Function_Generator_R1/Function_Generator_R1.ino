@@ -62,7 +62,7 @@ void setup()
  SPI.setDataMode(SPI_MODE2); // requires SPI Mode for AD9837
  SPI.begin();
  
- delay(100); //A little set up time, just to make sure everything's stable
+ delay(1000); //A little set up time, just to make sure everything's stable
  
   digitalPotWrite(1, 255);
  
@@ -83,9 +83,9 @@ void setup()
  
 void loop()
 {
-  //WriteFrequencyAD9837(20000);
-  //delay(100);
-  
+  delay(10000);
+  //digitalWrite(
+  //digitalPotWrite(1, 150);
 }
 void WriteFrequencyAD9837(long frequency)
 {
@@ -136,7 +136,7 @@ WriteRegisterAD9837(phase); //mid-low
  //WriteRegisterAD9837(0x2028); //square
  //WriteRegisterAD9837(0x2000); //sin
  //WriteRegisterAD9837(0x2002); //triangle
- writeWaveformDDS(2);
+ //writeWaveformDDS(2);
 }
  
  void writeWaveformDDS(int form){
@@ -172,9 +172,11 @@ delay(10);
 void digitalPotWrite(int address, int value) {
   // take the SS pin low to select the chip:
   digitalWrite(CS_POTS,LOW);
+  delay(10);
   //  send in the address and value via SPI:
   SPI.transfer(address);
   SPI.transfer(value);
   // take the SS pin high to de-select the chip:
+  delay(10);
   digitalWrite(CS_POTS,HIGH); 
 }

@@ -30,7 +30,7 @@ void setup()
 {
   size(640, 480);
   // Open the port that the board is connected to and use the same speed (9600 bps)
-  port = new Serial(this, "COM16", 1000000);
+  port = new Serial(this, "COM17", 1000000);
   values = new int[width];
   smooth();
 }
@@ -41,7 +41,7 @@ int getY(int val) {
 
 void draw()
 {
-  while (port.available() >= 3) {
+  while (port.available() >= 2) {
     if (port.read() == 0xff) {
       val = port.read();
       //println(binary(val));
