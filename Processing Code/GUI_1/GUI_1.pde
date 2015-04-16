@@ -14,12 +14,13 @@ ControlP5 cp5;
 
 float vertPos, horPos;
 int timeDiv, voltsDiv;
-float vVal, hVal;
+float vVal, hVal, vcVal;
 int trigger, Hslider1, Hslider2, Vslider1, Vslider2;
 boolean Tcursor1, Tcursor2, Vcursor1, Vcursor2;
 PFont f;
 float vScale, tScale;
 float v1, v2, dv, t1, t2, dt, freq;
+float offset;
 String vVal2, hVal2;
 
 Serial port;  // Create object from Serial class
@@ -131,6 +132,8 @@ void setup() {
      .setVisible(false)
      ; 
 
+  cp5.getController("Vslider1").getValueLabel().setVisible(false);
+
   cp5.addSlider("Vslider2") //slider along with Vcursor2 for volts 2 
      .setPosition(1410,400)
      .setWidth(20)
@@ -139,6 +142,9 @@ void setup() {
      .setValue(475)
      .setVisible(false)
      ; 
+     
+  cp5.getController("Vslider2").getValueLabel().setVisible(false);
+
     
   cp5.addSlider("Hslider1") //slider along with Tcursor1 for time 1
      .setPosition(1460,310)
@@ -149,6 +155,9 @@ void setup() {
      .setVisible(false)
      ; 
 
+  cp5.getController("Hslider1").getValueLabel().setVisible(false);
+
+
   cp5.addSlider("Hslider2") //slider along with Tcursor2 for time 2 
      .setPosition(1460,350)
      .setWidth(400)
@@ -157,7 +166,9 @@ void setup() {
      .setValue(625)
      .setVisible(false)
      ;     
-    
+ 
+  cp5.getController("Hslider2").getValueLabel().setVisible(false);
+   
 
   
   cp5.addBang("ZeroH",1360,52,25,25); //bang for zero the horPos
@@ -181,7 +192,8 @@ void setup() {
 
 //getY method
 int getY(int val) {
-  return (int)(((val / 256.0f) * (900/vScale)) + 25);// + (900*vScale)-900);
+  int y = Math.round(-112.5f*((-10/vScale)*(.0078431373f*val-1)) + 475.5);
+  return y;
 }
 
 
@@ -370,6 +382,10 @@ void draw() {
   hVal = ((horPos*.009765625) - 5)*tScale;
   vVal = ((vertPos*.0078125) - 4)*vScale;
   
+  offset = ((vertPos*.87890625)+25);
+  
+  vcVal = (vertPos*.87890625) - 450;
+  
   //draw screen in colors of sliders
   fill(128,150,140);
   rect(25,25,1200,900);
@@ -433,14 +449,22 @@ void draw() {
   }
 
   if (Vcursor1==true) {
-    line(25,Vslider1,1225,Vslider1);
+    float y1 = Vslider1 - vcVal;
+    float y2 = Vslider1 - vcVal;
+    y1 = constrain(y1, 26, 924);
+    y2 = constrain(y2, 26, 924);
+    line(25,y1,1225,y2);
     v1 = ((-.0088888888)*(Vslider1-25) + 4)*vScale;
     String v1_1 = String.format("%.3f", v1);
     text("Voltage 1 = "+v1_1+" V",1650,440);
   }
   
   if (Vcursor2==true) {
-    line(25,Vslider2,1225,Vslider2);
+    float y1 = Vslider2 - vcVal;
+    float y2 = Vslider2 - vcVal;
+    y1 = constrain(y1, 26, 924);
+    y2 = constrain(y2, 26, 924);
+    line(25,y1,1225,y2);
     v2 = ((-.0088888888)*(Vslider2-25) + 4)*vScale;
     String v2_2 = String.format("%.3f", v2);
     text("Voltage 2 = "+v2_2+" V",1650,470);
@@ -467,18 +491,19 @@ void draw() {
   while (port.available() >= 2) {
     if (port.read() == 0xff) {
       val = port.read();
+      //println(val);
     }
   }
   for (int i=0; i<1200-1; i++)
     values[i] = values[i+1];
   values[1200-1] = val;
-  stroke(22, 245, 57);
+  stroke(180, 30, 30);
   strokeWeight(2);
   for (int x=1; x<1200-1; x++) {
     int x1 = 1200-x+25;
     int x2 = 1200-1-x+25;
-    int y1 = 900+50-getY(values[x-1])+(512-Math.round(vertPos));
-    int y2 = 900+50-getY(values[x])+(512-Math.round(vertPos));
+    int y1 = 900+50-getY(values[x-1])+(475-Math.round(offset));
+    int y2 = 900+50-getY(values[x])+(475-Math.round(offset));
     x1 = constrain(x1,26,1224);
     x2 = constrain(x2,26,1224);
     y1 = constrain(y1,26,924);
