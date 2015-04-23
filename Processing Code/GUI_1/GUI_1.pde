@@ -183,7 +183,7 @@ void setup() {
   f = createFont("Arial",16,true); //creates font class
   
   //serial link setup
-  port = new Serial(this, "COM25", 115200);
+  port = new Serial(this, "COM30", 115200);
   values = new int[1200];
   smooth();
   

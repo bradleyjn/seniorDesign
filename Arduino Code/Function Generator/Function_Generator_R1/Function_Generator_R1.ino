@@ -69,7 +69,7 @@ void setup()
  //Initial frequency
  freq = 10000;
  WriteFrequencyAD9837(freq);
- writeWaveformDDS(1);
+ writeWaveformDDS(0);
  
  delay(100);
  

@@ -1,4 +1,4 @@
-#define ANALOG_IN 0
+#define ANALOG_IN 5
 
 void setup() {
   Serial.begin(115200); 

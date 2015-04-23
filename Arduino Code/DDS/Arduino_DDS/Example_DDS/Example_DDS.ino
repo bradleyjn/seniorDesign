@@ -122,8 +122,8 @@ WriteRegisterAD9837(phase); //mid-low
  
  //Power it back up
  //WriteRegisterAD9837(0x2020); //square with half frequency
- //WriteRegisterAD9837(0x2028); //square
- WriteRegisterAD9837(0x2000); //sin
+ WriteRegisterAD9837(0x2028); //square
+ //WriteRegisterAD9837(0x2000); //sin
  //WriteRegisterAD9837(0x2002); //triangle
  
 }
