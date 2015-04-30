@@ -14,12 +14,18 @@ void setup() {
   // initialize SPI:
   SPI.begin(); 
   Serial.begin(9600);
+  setResGain(1);
+  setAmp(1);
+  setOff(0);
+  printValues3();
+  printPots();
 }
 
 void loop() {
-
+  
+  delay(1000);
   //For one resolution test
-
+  /*
   for (int i = 1; i < 100; i=i+5) { 
    // change the gain on this channel from min to max:
    setResGain(i);
@@ -30,24 +36,30 @@ void loop() {
    Serial.println(analogRead(0));
    delay(1000);
    }
-
+    */
 }
 
+
+void printPots(){
+  Serial.println("POTS------");
+  Serial.print(pot1);
+  Serial.print("   ");
+  Serial.print(pot2);
+  Serial.print("   ");
+  Serial.println(pot3);  
+}
 void digitalPotWrite(int address, int value) {
+  value = constrain(value, 0, 256);
   switch(address){
     case(1):
       //Serial.println("CASE 1");
-      pot1 = constrain(value, 0, 256);
-      Serial.print("pot1 = ");
-      Serial.println(pot1);
+      pot1 = value;
     break;
     case(2):
-      value = constrain(value, 0, 100000);
-      pot2 = round((value-1)*1000);
+      pot2 = value;
     break;
     case(3):
-      value = constrain(value, -5, 5);
-      pot3 = round((value+5)*(10/256));
+      pot3 = value;
     break;
     default:
     break;
@@ -65,19 +77,38 @@ void digitalPotWrite(int address, int value) {
 
 
 void printValues3(){
-  Serial.print(analogRead(0));
+  int a0 = analogRead(0);
+  int a1 = analogRead(1);
+  int a2 = analogRead(2);
+  int res0 = map(a0, 0, 1023, 0, 100000);
+  int res1 = map(a1, 0, 1023, 0, 100000);
+  Serial.println("ADC------");
+  Serial.print(a0);
   Serial.print("   ");
-  Serial.print(analogRead(1));
+  Serial.print(a1);
   Serial.print("   ");
-  Serial.println(analogRead(2)); 
+  Serial.println(a2);
+  Serial.print(res0);
+  Serial.print("   ");
+  Serial.println(res1);
 }
 
 void setResGain(int gain){
   gain = constrain(gain, 1, 100);
   unsigned int r = map(gain, 1, 100, 0, 256);
-  Serial.print("r = ");
-  Serial.println(r);
   digitalPotWrite(1, r);
+}
+
+void setAmp(double amp){
+  amp = constrain(amp, .1, 10);
+  unsigned int r = map(amp, 0, 10, 0, 256);
+  digitalPotWrite(2, r);
+}
+
+void setOff(double off){
+  off = constrain(off, -5, 5);
+  unsigned int r = map(off, -5,5, 0, 256);
+  digitalPotWrite(3, r);
 }
 
 
