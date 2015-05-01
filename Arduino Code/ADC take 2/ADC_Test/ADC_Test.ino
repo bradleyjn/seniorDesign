@@ -27,7 +27,7 @@ void setup() {
  pinMode(CS_ADC, OUTPUT);
  DDRD = B00001010;  //Set pins 4-7 as inputs, leave pins 0-3 alone
  DDRB = B11110000;  //Set pins 8-11 as inputs, leave others alone
- Serial.begin(115200); // start serial communication at 9600bps
+ Serial.begin(1000000); // start serial communication at 9600bps
  attachInterrupt(0, readADC, FALLING);  
   //SPI.setDataMode(SPI_MODE2);
   //SPI.begin();
